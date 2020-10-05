@@ -1,0 +1,29 @@
+package com.tjut.cacheEvict;
+
+import com.tjut.cacheEvict.cache.Cache;
+import com.tjut.cacheEvict.cache.TmpLRUCache;
+import com.tjut.cacheEvict.config.Config;
+import com.tjut.cacheEvict.config.Request;
+import com.tjut.cacheEvict.feature.FeatureLib;
+import com.tjut.cacheEvict.learning.IncrementalLearn;
+import com.tjut.cacheEvict.sample.ILSampleLib;
+import com.tjut.cacheEvict.sample.PreStudySampleLib;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+
+/**
+ * @author tb
+ * @date 6/29/20-3:44 PM
+ */
+//cd jar's directory : java -cp  CacheEvict-1.0-SNAPSHOT.jar com.tjut.cacheEvict.Simulation ../test.properties
+public class Test {
+
+    public static void main(String[] args) {
+
+        ThreadLocal<String> str = new ThreadLocal<>();//hashcode 是new的时候分配好的，所以每个线程的threadLocal变量都是不同的hashcode
+        str.set("he");
+        System.out.println("hello world");
+    }
+
+}
