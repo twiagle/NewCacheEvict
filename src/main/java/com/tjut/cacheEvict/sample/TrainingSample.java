@@ -12,17 +12,20 @@ import java.util.Arrays;
  * @date 7/3/20-1:15 PM
  */
 public class TrainingSample {
+    long objID;
     private int[] trainingSample;
 
-    //SampleLib !contains, and put an unlabeled training sample into lib, the feature is done but waiting for label
-    //invoked when reused or expired
-    public TrainingSample(Feature feature, int objID, long curTimeStamp, int label){
+    public TrainingSample(Feature feature, long objID, long curTimeStamp, int label){
+        this.objID = objID;
         int len = feature.getTotalFeatureNum() + 2;
-        trainingSample = new int[len]; // 比常规存储特征多一个最后一次访问间隔，多一个标签
-        trainingSample[len - 2] = (int) (curTimeStamp - feature.getLastTimeStamp());// 一定有这个体征
+        trainingSample = new int[len]; // 送入学习的时间点距离最后一次访问的间隔
         System.arraycopy(feature.getFeatures(),0,trainingSample,0,feature.getTotalFeatureNum());
-        // 1 超过BB会被驱逐， 0 BB之内
+        trainingSample[len - 2] = (int) (curTimeStamp - feature.getLastTimeStamp());
         trainingSample[len - 1] = label;
+    }
+
+    public void setLabel(int label) {
+        trainingSample[trainingSample.length - 1] = label;
     }
 
     public int[] getTrainingSample() {

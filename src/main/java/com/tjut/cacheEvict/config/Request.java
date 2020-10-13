@@ -6,15 +6,15 @@ package com.tjut.cacheEvict.config;
  */
 public class Request {
     long reqTimeStamp;
-    int objID;
+    long objID;
     int size;
     int type;
 
-    public int getObjID() {
+    public long getObjID() {
         return objID;
     }
 
-    public void setObjID(int objID) {
+    public void setObjID(long objID) {
         this.objID = objID;
     }
 

@@ -11,6 +11,8 @@ import com.tjut.cacheEvict.sample.PreStudySampleLib;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * @author tb
@@ -20,10 +22,10 @@ import java.io.FileReader;
 public class Test {
 
     public static void main(String[] args) {
-
-        ThreadLocal<String> str = new ThreadLocal<>();//hashcode 是new的时候分配好的，所以每个线程的threadLocal变量都是不同的hashcode
-        str.set("he");
-        System.out.println("hello world");
+        List<Integer> expiredObj = new ArrayList<>();
+        for (Integer integer : expiredObj) {
+            System.out.println(integer);
+        }
     }
 
 }

@@ -17,20 +17,19 @@ public class CycQueue {//
         private int maxSize;//power of 2 to support & (maxSize -1)
         private int deltaNum;//power of 2 to support & (maxSize -1)
 
+    public CycQueue copy(CycQueue c) {
+        CycQueue cycQueue = new CycQueue(this.deltaNum);
+        cycQueue.arr = Arrays.copyOf(arr, arr.length);
+        return cycQueue;
+    }
 
-    public CycQueue(int deltaNum) {//e.g. features are delta 1 2 3 4 5 6 7
+    public CycQueue(int deltaNum) { // e.g. features are delta 1 2 3 4 5 6 7
             this.deltaNum = deltaNum; // 7
             this.maxSize = deltaNum + 1;// so 8
             arr = new int[this.maxSize];// 循环队列最大8 7+black
             Arrays.fill(arr, Integer.MAX_VALUE);// initial MAX_VALUE for those interval are not available
             front = rear = 0;
         }
-//resize depends on whether learn++nse supports omitted feature
-//        public CycQueue(CycQueue old){
-//            int oldSize = old.maxSize;
-//            maxSize = oldSize << 1;
-//            arr = Arrays.copyOf(old.arr, maxSize);
-//        }
 
         //入队前判满
         public void enQueue(int e) {

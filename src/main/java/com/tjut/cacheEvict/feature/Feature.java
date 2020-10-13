@@ -13,14 +13,13 @@ import java.util.Arrays;
  * Feature stores
  */
 public class Feature {
-    private int objID;
+    private long objID;
     private int size;
     private int type;
-    private CycQueue cycQueue;
-
-    private long lastTimeStamp;
     private int deltaNum;
     private int totalFeatureNum;
+    private long lastTimeStamp;
+    private CycQueue cycQueue;
 
     public Feature(Request req) { // 第一次访问同一个对象时不初始化特征向量
         lastTimeStamp = req.getReqTimeStamp();
@@ -56,7 +55,7 @@ public class Feature {
         return totalFeatureNum;
     }
 
-    public int getObjID() {
+    public long getObjID() {
         return objID;
     }
 

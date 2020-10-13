@@ -6,6 +6,7 @@ import com.tjut.cacheEvict.feature.Feature;
 import com.tjut.cacheEvict.feature.FeatureLib;
 import com.tjut.cacheEvict.learning.IncrementalLearn;
 
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -13,48 +14,53 @@ import java.util.List;
  * @date 7/3/20-9:40 PM
  * listen for subscribed obj by IncrmnLearn
  */
-public class ILSampleLib extends AbstractSampleLib {
+public class ILSampleLib implements AbstractSampleLib {
+    private static HashMap<Long, TrainingSample> labeledFeatureLib;
+    private static HashMap<Long, TrainingSample> subscribedFeatureLib;
     private static ILSampleLib ilSampleLib = new ILSampleLib();
 
-    public static ILSampleLib getInstance() {
-        return ilSampleLib;
+    private ILSampleLib() {
+        int sampleNum = Config.getInstance().getSampleNum();
+        labeledFeatureLib = new HashMap<>(sampleNum);
+        subscribedFeatureLib = new HashMap<>(sampleNum);
     }
 
-    public static void addSubscribedObj(int[] subscribedObj) {
-        for (int objID : subscribedObj) {
-            Feature feature = FeatureLib.getInstance().getFeature(objID);
-            labeledFeatureLib.put(objID, null);
+    public static void clear(){
+        labeledFeatureLib.clear();
+    }
+
+    //保存起来当前的特征，不需要保留预测值，因为LearnNSE更新模型的时候会一样的特征再算一遍得到相同的结果
+    public static void addSubscribedObjs(Request req, long[] subscribedObj) {
+        for (long objID : subscribedObj) {
+            FeatureLib featureLib = FeatureLib.getInstance();
+            TrainingSample trainingSample = new TrainingSample(featureLib.getFeature(objID), objID, req.getReqTimeStamp(), AbstractSampleLib.OUT_OF_BB);
+            subscribedFeatureLib.put(objID, trainingSample);
         }
     }
 
     public static void generateSamples(Request req) {
-        int id = req.getObjID();
+        long id = req.getObjID();
         FeatureLib featureLib = FeatureLib.getInstance();
-        //expire window
-        List<Integer> expiredObject = FeatureLib.getInstance().getExpiredObject(req);
-        if(expiredObject != null && expiredObject.size()>0){
-            for (Integer objID : expiredObject) {
-                Feature feature = FeatureLib.getInstance().getFeature(objID);
-                if(labeledFeatureLib.containsKey(objID)){
-                    TrainingSample ts = new TrainingSample(featureLib.getFeature(objID), objID,  req.getReqTimeStamp(), 1);
-                    labeledFeatureLib.put(objID, ts);//expired obj
-                }
+        List<Long> expiredObject = featureLib.getExpiredObject(req);
+        TrainingSample ts;
+        // add expired
+        for (Long objID : expiredObject) {
+            if (null != (ts = subscribedFeatureLib.get(objID))) {
+                ts.setLabel(OUT_OF_BB);
+                labeledFeatureLib.put(objID, ts);
+                subscribedFeatureLib.remove(objID);
             }
         }
-
-        //add subscribed
-        int objID = req.getObjID();
-        if(labeledFeatureLib.containsKey(objID)){
-        }else{//generate feature for each obj once
-            Feature feature = FeatureLib.getInstance().getFeature(req.getObjID());
-            TrainingSample ts = new TrainingSample(featureLib.getFeature(objID), objID,  req.getReqTimeStamp(), 1);
-            labeledFeatureLib.put(req.getObjID(), ts);//mark as generated
+        // add subscribed,过期的就remove掉,所以不会再进来
+        if (null != (ts = subscribedFeatureLib.get(id))) {
+            ts.setLabel(WITH_IN_BB);
+            labeledFeatureLib.put(id, ts);
+            subscribedFeatureLib.remove(id);
         }
-
-        /*publish to IncrementalLearn, and start to accumulate samples for next round*/
-        if(labeledFeatureLib.size() >= Config.getInstance().getTrainingInterval()){
-            IncrementalLearn.selfUpdate();
-            ILSampleLib.clear();
+        // IL update
+        if (labeledFeatureLib.size() >= Config.getInstance().getTrainingInterval()) {
+            IncrementalLearn.selfUpdate(Utils.generateInstances(labeledFeatureLib));
+            clear();
         }
     }
 }
