@@ -17,10 +17,10 @@ public class TrainingSample {
 
     public TrainingSample(Feature feature, long objID, long curTimeStamp, int label){
         this.objID = objID;
-        int len = feature.getTotalFeatureNum() + 2;
+        int len = feature.getTotalFeatureNum() + 1;
         trainingSample = new int[len]; // 送入学习的时间点距离最后一次访问的间隔
         System.arraycopy(feature.getFeatures(),0,trainingSample,0,feature.getTotalFeatureNum());
-        trainingSample[len - 2] = (int) (curTimeStamp - feature.getLastTimeStamp());
+//        trainingSample[len - 2] = (int) (curTimeStamp - feature.getLastTimeStamp());
         trainingSample[len - 1] = label;
     }
 

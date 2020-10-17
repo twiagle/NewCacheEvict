@@ -39,6 +39,10 @@ public class Cache{
         Random generator = new Random();
         long[] keys = map.keySet().stream().mapToLong(Long::longValue).toArray();
         long[] sampledKeys = new long[cache.sampleNum];
+        //个头不够，没有必要采样
+        if(keys.length <= 2 * cache.sampleNum) {
+            return keys;
+        }
         Set<Integer> set = new HashSet<>(cache.sampleNum);
         while (set.size() < cache.sampleNum) { // 0, 1, 2  共3次
             set.add(generator.nextInt(keys.length));
@@ -65,6 +69,12 @@ public class Cache{
         }
     }
 
+    public void remove(long[] keys){
+        for (long key : keys) {
+            remove(key);
+        }
+    }
+
     public void remove(List<Long> keys){
         for (long key : keys) {
             remove(key);
@@ -74,7 +84,12 @@ public class Cache{
     public void put(Request req) {
         usedCacheSize += req.getSize();
         while (usedCacheSize > maxCacheSize) {
-            List<Long> evictedObjs = IncrementalLearn.evict(req, getSampledKeys());
+            long[] samples = getSampledKeys();
+            List<Long> evictedObjs = IncrementalLearn.evict(req, samples);
+            //IL有可能一直算出都在，必须有个兜底策略否则死循环
+            if (evictedObjs.size() == 0){
+                remove(samples);
+            }
             remove(evictedObjs);
         }
         map.put(req.getObjID(), req.getSize());

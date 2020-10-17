@@ -62,6 +62,9 @@ public class Simulation {
                 }else{
                     cache.put(req);
                 }
+                if (timeStamp % 100000 == 0) {
+                    System.out.println("timeStamp" + timeStamp);
+                }
             }
             System.out.printf("hit ratio is %f", (float)hit / totalReq);
         } catch (Exception e) {
@@ -79,11 +82,11 @@ public class Simulation {
         req.setReqTimeStamp(timeStamp);   //这个可以用trace[0] 看哪个效果好就行
         req.setObjID(Long.parseLong(trace[1]));
         req.setSize(Integer.parseInt(trace[2]));
-        if(trace.length == 4){
-            req.setType(Integer.parseInt(trace[3]));
-        }else{ //有的数据集没有这个
-            req.setType(0);
-        }
+//        if(trace.length == 4){
+//            req.setType(Integer.parseInt(trace[3]));
+//        }else{ //有的数据集没有这个
+//            req.setType(0);
+//        }
         return req;
     }
 }

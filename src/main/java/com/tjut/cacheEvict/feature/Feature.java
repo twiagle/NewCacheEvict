@@ -15,7 +15,7 @@ import java.util.Arrays;
 public class Feature {
     private long objID;
     private int size;
-    private int type;
+//    private int type;
     private int deltaNum;
     private int totalFeatureNum;
     private long lastTimeStamp;
@@ -25,9 +25,9 @@ public class Feature {
         lastTimeStamp = req.getReqTimeStamp();
         objID = req.getObjID();
         size = req.getSize();
-        type = req.getType();
+//        type = req.getType();
         deltaNum = Config.getInstance().getFeatureNum(); // 初始化循环队列时就决定，以后可以逐渐增大，需要确定LearnNse代码是否支持空特征，或把不足的在学习之前手动添加无穷
-        totalFeatureNum = deltaNum + 2;//size + type 用于确定特征数组下标
+        totalFeatureNum = deltaNum + 1;//size用于确定特征数组下标, type全部相同导致概率密度为0，爆炸
     }
 
     public void updateFeature(Request req){
@@ -42,12 +42,13 @@ public class Feature {
     public int[] getFeatures(){
         int[] features = new int[totalFeatureNum];// delta size type
         if (cycQueue == null) {
-            Arrays.fill(features, Integer.MAX_VALUE);// initial MAX_VALUE for those interval are not available
+//            Arrays.fill(features, Integer.MAX_VALUE);// initial MAX_VALUE for those interval are not available
+            Arrays.fill(features, Config.getInstance().getBeladyBoundry());// initial MAX_VALUE for those interval are not available
         } else {
             System.arraycopy(cycQueue.getDeltas(),0, features, 0, deltaNum);
         }
-        features[totalFeatureNum-2] = size;
-        features[totalFeatureNum-1] = type;
+        features[totalFeatureNum-1] = size;
+//        features[totalFeatureNum-1] = type;
         return features;
     }
 
@@ -63,9 +64,9 @@ public class Feature {
         return size;
     }
 
-    public int getType() {
-        return type;
-    }
+//    public int getType() {
+//        return type;
+//    }
 
     public CycQueue getCycQueue() {
         return cycQueue;
